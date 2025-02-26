@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const dbConnect = require("./config/db");
-
+const userRoutesPath = require('./routes/user');
 const { API_VERSION, API_NAME } = process.env;
 
 const app = express();
@@ -19,8 +19,6 @@ app.use((req, res, next) => {
     next();
 });
 const basePath = `/${API_NAME}/${API_VERSION}`;
-app.get('/', (req, res) => {
-    res.status(200).send({ response: 'ok' });
-});
+app.use(basePath, userRoutesPath)
 
 module.exports = httpServer;
