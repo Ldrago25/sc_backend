@@ -10,7 +10,7 @@ module.exports = {
             if (result.length == 0) {
                 return res.status(500).send({ response: 'Usuario no encontrado' });
             }
-            res.status(200).send({ response: result[0].identification });
+            res.status(200).send({ response: { identification: result[0].identification, email: result[0].email } });
         });
     },
     update: async(req, res) => {
