@@ -1,5 +1,6 @@
 const user = require("../models/user");
 const bcrypt = require('bcrypt');
+const fs = require("fs");
 const { createAccessToken, createRefreshToken } = require('../utils/jwt');
 module.exports = {
     validateIdentification: (req, res) => {
@@ -60,5 +61,42 @@ module.exports = {
                 },
             });
         });
-    }
+    },
+    loadFile: async(req, res) => {
+        try {
+            if (!req.file) {
+                return res.status(400).json({ error: "No se envió ningún archivo" });
+            }
+
+            const filePath = req.file.path;
+            const fileContent = fs.readFileSync(filePath, "utf8");
+
+            var arrayData = fileContent.split(',');
+            const data = {
+                name_full: arrayData[0] + ' ' + arrayData[1] + ' ' + arrayData[2] + ' ' + arrayData[3],
+                identification: arrayData[4],
+                email: arrayData[5],
+                uc: Number(arrayData[6]),
+                role: arrayData[8],
+                id_carrera: Number(arrayData[7]),
+                is_boss: Number(arrayData[9])
+            }
+
+            console.log(data);
+            user.insert(req.con, data, (err, result) => {
+                if (err) {
+                    return res.status(400).json({ error: "hubo error insertando la data " + err });
+                }
+                fs.unlinkSync(filePath);
+                console.log(result);
+
+                res.json({ message: "Archivo subido y guardado en la BD", id: result.insertId });
+            })
+
+
+        } catch (error) {
+            console.error("Error al subir el archivo:", error);
+            res.status(500).json({ error: "Error al procesar el archivo" });
+        }
+    },
 }
